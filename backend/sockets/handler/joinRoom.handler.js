@@ -18,6 +18,9 @@ const joinRoom = (socket) => {
     socket.join(roomId);
     console.log("user joined the room");
 
+    // request existing users to sync code with the new user
+    socket.to(roomId).emit("request-sync-code", socket.id);
+
     const participant = {
       socketId: socket.id,
       userId: user?._id || null,
