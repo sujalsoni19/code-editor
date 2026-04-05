@@ -87,4 +87,24 @@ const runCode = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, data, "code executed successfully"));
 });
 
-export { createRoom, joinRoom, runCode };
+const closeRoom = asyncHandler(async (req, res) => {
+  const { roomId } = req.params;
+  const userId = req.user._id;
+
+  const room = await Room.findOne({ roomId });
+
+  if (!room) {
+    throw new ApiError(404, "Room not found");
+  }
+
+  if (room.ownerId.toString() !== userId.toString()) {
+    throw new ApiError(403, "Only the room owner can close this room");
+  }
+
+  room.isActive = false;
+  await room.save();
+
+  res.status(200).json(new ApiResponse(200, room, "Room closed successfully"));
+});
+
+export { createRoom, joinRoom, runCode, closeRoom };
