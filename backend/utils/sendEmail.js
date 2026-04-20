@@ -4,7 +4,7 @@ export const sendEmail = async ({ to, subject, text, html }) => {
   const transporter = getTransporter();
 
   const mailOptions = {
-    from: `"example" <${process.env.SMTP_USER}>`,
+    from: `"Syncode" <${process.env.SMTP_USER}>`,
     to,
     subject,
     text,
