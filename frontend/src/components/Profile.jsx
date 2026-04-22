@@ -1,9 +1,4 @@
-import {
-  LogOutIcon,
-  User2Icon,
-  UserPen,
-  KeyRound,
-} from "lucide-react";
+import { LogOutIcon, User2Icon, UserPen, KeyRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -76,14 +71,14 @@ function Profile() {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem asChild>
-            <Link to={"/update-profile"}>
+            <Link to={"/me/update-profile"}>
               <UserPen className="mr-2 h-4 w-4" />
               Update profile
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
-            <Link to={"/change-password"}>
+            <Link to={"/me/change-password"}>
               <KeyRound className="mr-2 h-4 w-4" />
               Change password
             </Link>

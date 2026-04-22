@@ -5,5 +5,6 @@ import Fpassword from "./Fpassword.jsx";
 import Rpassword from "./Rpassword.jsx";
 import Home from "./Home.jsx";
 import UpdateProfile from "./UpdateProfile.jsx";
+import Cpassword from "./Cpassword.jsx"
 
-export { LandingPage, Register, Login, Fpassword, Rpassword, Home, UpdateProfile };
+export { LandingPage, Register, Login, Fpassword, Rpassword, Home, UpdateProfile, Cpassword };
