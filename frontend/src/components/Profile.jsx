@@ -1,11 +1,13 @@
 import {
-  BellIcon,
-  CreditCardIcon,
   LogOutIcon,
   User2Icon,
+  UserPen,
+  KeyRound,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Link, useNavigate } from "react-router-dom";
+import { logoutUser } from "@/api/user.api.js";
 
 import {
   DropdownMenu,
@@ -25,7 +27,19 @@ import {
 import { useUsercontext } from "@/context/userContext";
 
 function Profile() {
-  const { user } = useUsercontext();
+  const { user, setUser } = useUsercontext();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      const res = await logoutUser();
+      console.log(res);
+      setUser(null);
+      navigate("/login");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <DropdownMenu>
@@ -42,7 +56,6 @@ function Profile() {
 
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuGroup>
-
           {/* User Info */}
           <div className="px-2 py-1.5 flex flex-col space-y-1">
             <span className="text-sm font-medium leading-none">
@@ -56,33 +69,36 @@ function Profile() {
                 </span>
               </TooltipTrigger>
 
-              <TooltipContent side="bottom">
-                {user?.email}
-              </TooltipContent>
+              <TooltipContent side="bottom">{user?.email}</TooltipContent>
             </Tooltip>
           </div>
 
           <DropdownMenuSeparator />
 
-          <DropdownMenuItem>
-            <CreditCardIcon className="mr-2 h-4 w-4" />
-            Billing
+          <DropdownMenuItem asChild>
+            <Link to={"/update-profile"}>
+              <UserPen className="mr-2 h-4 w-4" />
+              Update profile
+            </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuItem>
-            <BellIcon className="mr-2 h-4 w-4" />
-            Notifications
+          <DropdownMenuItem asChild>
+            <Link to={"/change-password"}>
+              <KeyRound className="mr-2 h-4 w-4" />
+              Change password
+            </Link>
           </DropdownMenuItem>
-
         </DropdownMenuGroup>
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="text-red-500 cursor-pointer"
+        >
           <LogOutIcon className="mr-2 h-4 w-4" />
           Sign Out
         </DropdownMenuItem>
-
       </DropdownMenuContent>
     </DropdownMenu>
   );
