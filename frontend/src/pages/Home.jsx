@@ -1,18 +1,139 @@
-import React from 'react'
-import {NavbarAuth} from "../components/NavbarAuth.jsx"
-import HomeContent from '../components/HomeContent.jsx'
-import { Footer } from '../components/Footer.jsx'
+import { motion } from "framer-motion";
+import { Plus, DoorOpen, Clock, Code2, Sparkles } from "lucide-react";
 
-function Home() {
+import { useUsercontext } from "@/context/userContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+
+export default function Home() {
+  const { user } = useUsercontext();
+
   return (
-    <div className='flex w-full h-screen flex-col'>
-      <NavbarAuth />
-      <div className='flex-1'>
-        <HomeContent />
-      </div>
-      <Footer />
-    </div>
-  )
-}
+    <div className="mx-auto w-full max-w-6xl px-5 py-10 sm:px-6">
+      {/* Welcome Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-10 overflow-hidden rounded-3xl p-7 sm:p-8"
+      >
+        <div className="max-w-3xl">
+          <p className="inline-flex items-center gap-2 rounded-full  px-3 py-1 text-xs font-medium uppercase tracking-[0.22em] text-emerald-200">
+            <Sparkles className="h-3.5 w-3.5" />
+            Workspace Lobby
+          </p>
+          <h1 className="mt-4 text-3xl font-semibold text-white sm:text-4xl">
+            Welcome, {user?.username || "User"}
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-400 sm:text-base">
+            Create a room or join one with a 8-digit code shared by the host.
+          </p>
+        </div>
+      </motion.div>
 
-export default Home
+      {/* Main Actions */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Create Room */}
+        <motion.div whileHover={{ y: -4 }}>
+          <Card className="h-full border-emerald-400/15 bg-linear-to-b from-emerald-500/10 to-transparent transition hover:border-emerald-300/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-emerald-400" />
+                Create a new room
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="flex h-full flex-col gap-4">
+              <p className="text-sm text-zinc-400">
+                Start a new room and share the code with your team.
+              </p>
+
+              <div className="rounded-2xl border border-white/8 p-4 text-sm text-zinc-300">
+                Instant setup for a new live session.
+              </div>
+
+              <Button
+                size="lg"
+                className="mt-auto bg-emerald-500 text-black hover:bg-emerald-400"
+              >
+                Create Room
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Join Room */}
+        <motion.div whileHover={{ y: -4 }}>
+          <Card className="h-full border-cyan-400/15 bg-linear-to-b from-cyan-500/10 to-transparent transition hover:border-emerald-300/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DoorOpen className="h-5 w-5 text-cyan-400" />
+                Join a room
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="flex flex-col gap-4">
+              <p className="text-sm text-zinc-400">
+                Ask the host to share the 8-digit code, then enter it below.
+              </p>
+
+              <div className="rounded-2xl border border-cyan-400/15 bg-black/20 p-4">
+                <p className="text-sm font-medium text-white">
+                  Enter your 8-digit room code
+                </p>
+                <p className="mt-1 text-xs leading-5 text-zinc-400">
+                  Only alphanumeric codes are accepted. If you do not have one yet,
+                  ask the host to share it with you.
+                </p>
+                <Input
+                  placeholder="3fa9c1b2"
+                  inputMode="text"
+                  maxLength={8}
+                  className="mt-4 border-white/10 bg-zinc-800 focus:border-cyan-400"
+                />
+              </div>
+
+              <Button variant="secondary" size="lg" className="cursor-pointer">
+                Join Room
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
+      {/* Recent Rooms Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="mt-12"
+      >
+        <h2 className="mb-6 flex items-center gap-2 text-xl font-semibold text-white">
+          <Clock className="h-5 w-5 text-zinc-400" />
+          Recent Rooms
+        </h2>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Example card */}
+          <Card className="transition hover:border-emerald-300/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <Code2 className="h-4 w-4 text-emerald-300" />
+                room-3fa9c1b2
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="flex items-center justify-between">
+              <span className="text-xs text-zinc-400">Last active 2h ago</span>
+
+              <Button size="sm" variant="outline">
+                Open
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
