@@ -1,4 +1,5 @@
 const roomParticipants = {};
+const disconnectTimers = {};
 
 /*
 Structure:
@@ -16,14 +17,43 @@ roomParticipants = {
 */
 
 export const getParticipants = (roomId) => {
-  return roomParticipants[roomId] || [];
+  const list = roomParticipants[roomId] || [];
+
+  return [...list].sort((a, b) => {
+    if (a.isOwner) return -1;
+    if (b.isOwner) return 1;
+    return 0;
+  });
 };
 
 export const addParticipant = (roomId, user) => {
   if (!roomParticipants[roomId]) {
     roomParticipants[roomId] = [];
   }
-  roomParticipants[roomId].push(user);
+
+  const existing = roomParticipants[roomId].find(
+    (p) => p.userId === user.userId
+  );
+
+  if (existing) {
+    // user refreshed → update socketId
+    existing.socketId = user.socketId;
+
+    // cancel disconnect removal if pending
+    if (disconnectTimers[user.userId]) {
+      clearTimeout(disconnectTimers[user.userId]);
+      delete disconnectTimers[user.userId];
+    }
+
+    return;
+  }
+
+  const isOwner = roomParticipants[roomId].length === 0;
+
+  roomParticipants[roomId].push({
+    ...user,
+    isOwner
+  });
 };
 
 export const removeParticipant = (roomId, socketId) => {
@@ -55,7 +85,7 @@ export const findParticipantRoom = (socketId) => {
 export const getParticipant = (roomId, socketId) => {
   if (!roomParticipants[roomId]) return null;
 
-  return roomParticipants[roomId].find(
-    (p) => p.socketId === socketId
-  );
+  return roomParticipants[roomId].find((p) => p.socketId === socketId);
 };
+
+export { disconnectTimers };

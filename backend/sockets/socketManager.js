@@ -12,6 +12,7 @@ import {
 } from "../memory/roomParticipants.js";
 import { userLeft, deleteTimeline } from "../memory/timeline.js";
 import { Room } from "../models/room.model.js";
+import { disconnectTimers } from "../memory/roomParticipants.js";
 
 const socketManager = (io) => {
   io.on("connection", (socket) => {
@@ -21,41 +22,45 @@ const socketManager = (io) => {
     codeChange(socket);
     languageChange(socket);
 
-    socket.on("disconnect", async () => {
+    socket.on("disconnect", () => {
       const roomId = findParticipantRoom(socket.id);
 
       if (!roomId) return;
 
       const participant = getParticipant(roomId, socket.id);
 
-      if (participant) {
+      if (!participant) return;
+
+      // start a reconnect grace timer
+      disconnectTimers[participant.userId] = setTimeout(async () => {
         userLeft(roomId, participant);
-      }
 
-      // remove participant first
-      removeParticipant(roomId, socket.id);
+        removeParticipant(roomId, socket.id);
 
-      const remainingParticipants = getParticipants(roomId);
+        const remainingParticipants = getParticipants(roomId);
 
-      // check if room is empty
-      if (remainingParticipants.length === 0) {
-        const code = latestCode[roomId] ?? " ";
-        const language = latestLanguage[roomId] ?? "javascript";
+        // check if room is empty
+        if (remainingParticipants.length === 0) {
+          const code = latestCode[roomId] ?? " ";
+          const language = latestLanguage[roomId] ?? "javascript";
 
-        try {
-          await Room.findOneAndUpdate({ roomId }, { code, language });
-        } catch (err) {
-          console.error("Failed to persist room state:", err);
+          try {
+            await Room.findOneAndUpdate({ roomId }, { code, language });
+          } catch (err) {
+            console.error("Failed to persist room state:", err);
+          }
+
+          delete latestCode[roomId];
+          delete latestLanguage[roomId];
+          deleteTimeline(roomId);
         }
 
-        delete latestCode[roomId];
-        delete latestLanguage[roomId];
-        deleteTimeline(roomId);
-      }
+        socket.to(roomId).emit("user-left", participant);
 
-      socket.to(roomId).emit("user-left", participant);
+        delete disconnectTimers[participant.userId];
 
-      console.log("User disconnected:", socket.id);
+        console.log("User fully disconnected:", socket.id);
+      }, 3000); // 3 seconds reconnect window
     });
   });
 };
