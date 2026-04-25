@@ -7,6 +7,11 @@ function CodeEditor({ language, value, onChange }) {
       language={language}
       value={value}
       theme="vs-dark"
+      loading={
+        <div className="flex h-full items-center justify-center text-zinc-400">
+          Loading editor...
+        </div>
+      }
       onChange={(nextValue) => onChange(nextValue || "")}
       options={{
         fontSize: 14,

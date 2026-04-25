@@ -16,6 +16,7 @@ import {
   Home,
   UpdateProfile,
   Cpassword,
+  RoomEditor
 } from "./pages";
 import "./index.css";
 import App from "./App.jsx";
@@ -88,6 +89,10 @@ const router = createBrowserRouter([
       },
     ],
   },
+  {
+    path: "/room/:roomId",
+    element: <RoomEditor />
+  }
 ]);
 
 createRoot(document.getElementById("root")).render(
