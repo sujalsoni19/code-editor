@@ -5,9 +5,49 @@ import { useUsercontext } from "@/context/userContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
+import { createRoom, joinRoom } from "@/api/room.api.js";
+import { useState } from "react";
+import { toast } from "react-hot-toast";
 
 export default function Home() {
   const { user } = useUsercontext();
+  const navigate = useNavigate();
+  const [enteredRoomId, setenteredRoomId] = useState("");
+  const [serverError, setserverError] = useState("");
+
+  const ROOM_CODE_REGEX = /^[a-zA-Z0-9]{8}$/;
+  const isRoomIdValid = ROOM_CODE_REGEX.test(enteredRoomId.trim());
+
+  const createRoomHandler = async () => {
+    try {
+      const res = await createRoom();
+      console.log(res);
+      const roomId = res?.data?.data?.roomId;
+      navigate(`/room/${roomId}`);
+    } catch (error) {
+      console.log("error while creating room: ", error);
+    }
+  };
+
+  const joinRoomHandler = async () => {
+    if (!enteredRoomId) return;
+    const roomId = enteredRoomId.trim();
+
+    if (!ROOM_CODE_REGEX.test(roomId)) {
+      setserverError("Room code must be 8 alphanumeric characters");
+      return;
+    }
+    try {
+      setserverError("");
+      await joinRoom(roomId);
+      navigate(`/room/${roomId}`);
+      toast.success(`Room-${roomId} joined successfully`);
+    } catch (error) {
+      console.log("error in joining room: ", error);
+      setserverError(error.response?.data?.message || "something went wrong");
+    }
+  };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10 sm:px-6">
@@ -54,6 +94,7 @@ export default function Home() {
               </div>
 
               <Button
+                onClick={createRoomHandler}
                 size="lg"
                 className="mt-auto bg-emerald-500 text-black hover:bg-emerald-400"
               >
@@ -83,18 +124,35 @@ export default function Home() {
                   Enter your 8-digit room code
                 </p>
                 <p className="mt-1 text-xs leading-5 text-zinc-400">
-                  Only alphanumeric codes are accepted. If you do not have one yet,
-                  ask the host to share it with you.
+                  Only alphanumeric codes are accepted. If you do not have one
+                  yet, ask the host to share it with you.
                 </p>
                 <Input
-                  placeholder="3fa9c1b2"
+                  placeholder="e.g. 3fa9c1b2"
                   inputMode="text"
                   maxLength={8}
+                  onChange={(e) => {
+                    setenteredRoomId(e.target.value);
+                    setserverError("");
+                  }}
                   className="mt-4 border-white/10 bg-zinc-800 focus:border-cyan-400"
                 />
               </div>
-
-              <Button variant="secondary" size="lg" className="cursor-pointer">
+              {serverError && (
+                <p className="text-sm text-center text-red-400">
+                  {serverError}
+                </p>
+              )}
+              <Button
+                onClick={joinRoomHandler}
+                disabled={!isRoomIdValid}
+                size="lg"
+                className={`transition-all ${
+                  isRoomIdValid
+                    ? "bg-cyan-500 text-black hover:bg-cyan-400 cursor-pointer"
+                    : "bg-zinc-700 text-zinc-400 cursor-not-allowed"
+                }`}
+              >
                 Join Room
               </Button>
             </CardContent>
